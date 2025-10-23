@@ -1,0 +1,24 @@
+openapi: 3.0.3
+info:
+  title: Ikebana API
+  version: 0.1.0
+servers:
+  - url: https://<host>/api
+paths:
+  /users/register:
+    post:
+      summary: Register
+      requestBody: { required: true }
+      responses: { "201": { description: Created } }
+  /users/login:
+    post:
+      summary: Login
+      responses: { "200": { description: OK } }
+  /bouquets:
+    get:
+      summary: List bouquets
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+      responses: { "200": { description: OK } }

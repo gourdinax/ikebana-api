@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    /* Sortie */
+    "rootDir": "src",
+    "outDir": "dist",
+
+    /* ESM pour Node */
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    /* Qualité de build */
+    "strict": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    /* Interop & imports */
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": false,
+
+    /* Optionnels utiles en backend */
+    "types": ["node"]
+  },
+  "include": ["src"]
+}
