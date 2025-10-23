@@ -1,28 +1,24 @@
 {
   "compilerOptions": {
-    /* Sortie */
-    "rootDir": "src",
-    "outDir": "dist",
-
-    /* ESM pour Node */
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
 
-    /* Qualité de build */
+    "rootDir": "src",
+    "outDir": "dist",
+
+    "lib": ["ES2022"],
+    "types": ["node"],             // ✅ indispensable
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+
     "strict": true,
     "skipLibCheck": true,
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
 
-    /* Interop & imports */
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "verbatimModuleSyntax": false,
-
-    /* Optionnels utiles en backend */
-    "types": ["node"]
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force"
   },
   "include": ["src"]
 }
