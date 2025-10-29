@@ -1,4 +1,3 @@
-// scripts/seed.ts
 import "dotenv/config";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
@@ -10,6 +9,7 @@ import Venue from "../modules/venue/venue.model.js";
 import Session from "../modules/session/session.model.js";
 import Bouquet from "../modules/bouquet/bouquet.model.js";
 import Stock from "../modules/stock/stock.model.js";
+import Booking from "../modules/booking/booking.model.js";
 
 function maskUri(uri?: string) {
   if (!uri) return "UNDEFINED";
@@ -28,8 +28,8 @@ async function main() {
     console.error("❌ MONGODB_URI manquant dans .env");
     process.exit(1);
   }
-  console.log("🔌 Connecting to MongoDB:", maskUri(uri));
 
+  console.log("🔌 Connecting to MongoDB:", maskUri(uri));
   await mongoose.connect(uri);
   console.log("✅ Connected");
   const dbName = mongoose.connection.db?.databaseName ?? "(unknown)";
@@ -49,13 +49,51 @@ async function main() {
     { upsert: true, new: true }
   );
 
+  console.log("👥 Creating clients...");
+  const [alice, bob, claire] = await Promise.all([
+    User.findOneAndUpdate(
+      { email: "alice@example.com" },
+      {
+        email: "alice@example.com",
+        password_hash: await bcrypt.hash("alice1234", 10),
+        role: "client",
+        first_name: "Alice",
+        last_name: "Tanaka",
+      },
+      { upsert: true, new: true }
+    ),
+    User.findOneAndUpdate(
+      { email: "bob@example.com" },
+      {
+        email: "bob@example.com",
+        password_hash: await bcrypt.hash("bob1234", 10),
+        role: "client",
+        first_name: "Bob",
+        last_name: "Matsuda",
+      },
+      { upsert: true, new: true }
+    ),
+    User.findOneAndUpdate(
+      { email: "claire@example.com" },
+      {
+        email: "claire@example.com",
+        password_hash: await bcrypt.hash("claire1234", 10),
+        role: "client",
+        first_name: "Claire",
+        last_name: "Suzuki",
+      },
+      { upsert: true, new: true }
+    ),
+  ]);
+
   console.log("🌸 Creating workshop...");
   const w = await Workshop.create({
     title: "Initiation Ikebana",
     duration_min: 120,
     price_ttc: 40,
     default_capacity: 10,
-    tags: ["debutant"],
+    active: true,
+    tags: ["débutant"],
   });
 
   console.log("📍 Creating venue...");
@@ -96,14 +134,45 @@ async function main() {
   await Stock.create({ bouquet_id: b1._id, variant_code: "S", qty: 10 });
   await Stock.create({ bouquet_id: b1._id, variant_code: "M", qty: 8 });
   await Stock.create({ bouquet_id: b2._id, variant_code: "BASE", qty: 5 });
+
+  console.log("🧾 Creating bookings...");
+  await Booking.deleteMany({});
+  await Booking.insertMany([
+    {
+      user_id: alice._id,
+      session_id: s._id,
+      qty: 2,
+      total_ttc: 80,
+      currency: "EUR",
+      status: "confirmed",
+    },
+    {
+      user_id: bob._id,
+      session_id: s._id,
+      qty: 1,
+      total_ttc: 40,
+      currency: "EUR",
+      status: "pending",
+    },
+    {
+      user_id: claire._id,
+      session_id: s._id,
+      qty: 1,
+      total_ttc: 40,
+      currency: "EUR",
+      status: "confirmed",
+    },
+  ]);
+
   // --- COUNTS ---
-  const [uC, wC, vC, sC, bC, stC] = await Promise.all([
+  const [uC, wC, vC, sC, bC, stC, bkC] = await Promise.all([
     User.countDocuments(),
     Workshop.countDocuments(),
     Venue.countDocuments(),
     Session.countDocuments(),
     Bouquet.countDocuments(),
     Stock.countDocuments(),
+    Booking.countDocuments(),
   ]);
 
   console.log("✅ Seed OK");
@@ -114,9 +183,17 @@ async function main() {
     sessions: sC,
     bouquets: bC,
     stocks: stC,
+    bookings: bkC,
   });
 
   console.log("🔑 Admin login:", "admin@ikebana.dev / admin1234");
+  console.log("🔑 Test user login examples:");
+  console.table({
+    Alice: "alice@example.com / alice1234",
+    Bob: "bob@example.com / bob1234",
+    Claire: "claire@example.com / claire1234",
+  });
+
   await mongoose.disconnect();
   process.exit(0);
 }
