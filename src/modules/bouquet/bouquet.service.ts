@@ -1,5 +1,5 @@
+// src/modules/bouquet/bouquet.service.ts
 import Bouquet from "./bouquet.model.js";
-import type { IBouquet } from "./bouquet.model.js";
 
 type ListParams = {
   q?: string;
@@ -19,7 +19,7 @@ export async function listBouquets(params: ListParams) {
     tags,
     sort = "-created_at",
     page = 1,
-    limit = 20
+    limit = 20,
   } = params;
 
   const filter: any = {};
@@ -28,14 +28,13 @@ export async function listBouquets(params: ListParams) {
   if (tags?.length) filter.tags = { $in: tags };
   if (q) filter.$text = { $search: q };
 
-  // Map tri à des champs réels
   const sortMap: Record<string, any> = {
     "-created_at": { created_at: -1 },
     "created_at": { created_at: 1 },
     "name": { name: 1 },
     "-name": { name: -1 },
     "price": { base_price: 1 },
-    "-price": { base_price: -1 }
+    "-price": { base_price: -1 },
   };
 
   const cursor = Bouquet.find(filter)
@@ -45,7 +44,7 @@ export async function listBouquets(params: ListParams) {
 
   const [items, total] = await Promise.all([
     cursor.lean(),
-    Bouquet.countDocuments(filter)
+    Bouquet.countDocuments(filter),
   ]);
 
   return {
@@ -53,7 +52,7 @@ export async function listBouquets(params: ListParams) {
     page,
     limit,
     total,
-    pages: Math.ceil(total / limit)
+    pages: Math.ceil(total / limit),
   };
 }
 
@@ -61,11 +60,11 @@ export async function getBouquetById(id: string) {
   return Bouquet.findById(id);
 }
 
-export async function createBouquet(data: Partial<IBouquet>) {
+export async function createBouquet(data: any) {
   return Bouquet.create(data);
 }
 
-export async function updateBouquet(id: string, patch: Partial<IBouquet>) {
+export async function updateBouquet(id: string, patch: any) {
   return Bouquet.findByIdAndUpdate(id, { $set: patch }, { new: true, runValidators: true });
 }
 
