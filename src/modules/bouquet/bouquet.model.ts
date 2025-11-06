@@ -1,6 +1,34 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 
-const VariantSchema = new Schema(
+// ---------- Types TS exportés ----------
+export type BouquetImage = {
+  file_id: string;   // ID GridFS (string)
+  alt?: string;
+  sort?: number;
+};
+
+export type BouquetVariant = {
+  code: string;
+  label?: string;
+  price: number;
+};
+
+export interface IBouquet {
+  _id?: mongoose.Types.ObjectId;
+  name: string;
+  description?: string;
+  categories?: string[];
+  images?: BouquetImage[];
+  active: boolean;
+  base_price: number;
+  variants?: BouquetVariant[];
+  tags?: string[];
+  created_at?: Date;
+  updated_at?: Date;
+}
+
+// ---------- Schémas Mongoose ----------
+const VariantSchema = new Schema<BouquetVariant>(
   {
     code: { type: String, required: true },
     label: { type: String, default: "" },
@@ -9,22 +37,21 @@ const VariantSchema = new Schema(
   { _id: false }
 );
 
-const BouquetSchema = new Schema(
+const ImageSchema = new Schema<BouquetImage>(
+  {
+    file_id: { type: String, required: true },
+    alt: { type: String, default: "" },
+    sort: { type: Number, default: 0 },
+  },
+  { _id: true }
+);
+
+const BouquetSchema = new Schema<IBouquet>(
   {
     name: { type: String, required: true },
     description: { type: String, default: "" },
     categories: { type: [String], default: [] },
-    // Images liées à GridFS
-    images: {
-      type: [
-        {
-          file_id: { type: String, required: true }, // id GridFS
-          alt: { type: String, default: "" },
-          sort: { type: Number, default: 0 },
-        },
-      ],
-      default: [],
-    },
+    images: { type: [ImageSchema], default: [] },
     active: { type: Boolean, default: true },
     base_price: { type: Number, required: true },
     variants: { type: [VariantSchema], default: [] },
@@ -35,4 +62,5 @@ const BouquetSchema = new Schema(
 
 BouquetSchema.index({ name: 1 }, { unique: false });
 
-export default mongoose.model("Bouquet", BouquetSchema);
+// ---------- Export du modèle typé ----------
+export default model<IBouquet>("Bouquet", BouquetSchema);
