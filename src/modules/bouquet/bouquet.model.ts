@@ -1,44 +1,38 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const variantSchema = new Schema(
+const VariantSchema = new Schema(
   {
-    code: { type: String, required: true, trim: true },
-    label: { type: String, trim: true },
-    price: { type: Number, required: true, min: 0 }
+    code: { type: String, required: true },
+    label: { type: String, default: "" },
+    price: { type: Number, required: true },
   },
   { _id: false }
 );
 
-const bouquetSchema = new Schema(
+const BouquetSchema = new Schema(
   {
-    name: { type: String, required: true, trim: true },
+    name: { type: String, required: true },
     description: { type: String, default: "" },
     categories: { type: [String], default: [] },
-    images: { type: [String], default: [] },
-    active: { type: Boolean, default: true, index: true },
-    base_price: { type: Number, required: true, min: 0 },
-    variants: { type: [variantSchema], default: [] },
-    tags: { type: [String], default: [] }
+    // Images liées à GridFS
+    images: {
+      type: [
+        {
+          file_id: { type: String, required: true }, // id GridFS
+          alt: { type: String, default: "" },
+          sort: { type: Number, default: 0 },
+        },
+      ],
+      default: [],
+    },
+    active: { type: Boolean, default: true },
+    base_price: { type: Number, required: true },
+    variants: { type: [VariantSchema], default: [] },
+    tags: { type: [String], default: [] },
   },
-  { timestamps: { createdAt: "created_at", updatedAt: "updated_at" }, versionKey: false }
+  { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
 
-// Indexs utiles
-bouquetSchema.index({ name: "text", description: "text", tags: "text" });
+BouquetSchema.index({ name: 1 }, { unique: false });
 
-export type Variant = { code: string; label?: string; price: number };
-export type IBouquet = {
-  _id: string;
-  name: string;
-  description?: string;
-  categories: string[];
-  images: string[];
-  active: boolean;
-  base_price: number;
-  variants: Variant[];
-  tags: string[];
-  created_at: Date;
-  updated_at: Date;
-};
-
-export default model<IBouquet>("Bouquet", bouquetSchema);
+export default mongoose.model("Bouquet", BouquetSchema);

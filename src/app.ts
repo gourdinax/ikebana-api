@@ -17,6 +17,7 @@ import sessionRoutes from "./modules/session/session.routes.js";
 import bookingRoutes from "./modules/booking/booking.routes.js";
 import venueRoutes from "./modules/venue/venue.routes.js";
 import stockRoutes from "./modules/stock/stock.routes.js";
+import gridfsRoutes from "./modules/gridfs/gridfs.routes.js";
 
 import { errorHandler } from "./middleware/error.js";
 
@@ -52,6 +53,7 @@ app.use("/api/sessions", sessionRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/venues", venueRoutes);
 app.use("/api/stocks", stockRoutes);
+app.use("/api/files", gridfsRoutes);
 
 // --- Gestion des erreurs ---
 app.use(errorHandler);
